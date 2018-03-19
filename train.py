@@ -4,29 +4,29 @@ import tensorflow as tf
 import nibabel as nib
 import numpy as np
 import os
-
-# img = nib.load('pack/preprocess/image/ADNI_002_S_1018_MR_MPR__GradWarp__B1_Correction__N3__Scaled_Br_20070217030439623_S23128_I40817.nii.gz')
-# data = img.get_data()
-# print(data.shape)
+from utils import *
 
 # basic param
-n_epoch = 1
+n_epoch = 200
 batch_size = 1
-learning_rate = 0.0001
+global_step = tf.Variable(0)
+learning_rate = tf.train.exponential_decay(0.01, global_step, 25, 0.96, staircase=True)
 print_freq = 1
 
 print("reading data...")
-data_set = DataSet("pack/normalize/image", "pack/normalize/label")
-# images = np.asarray(data_set.images)
-# labels = np.asarray(data_set.labels)
+data_set = DataSet("data/image", "data/label")
+images = np.asarray(data_set.images)
+labels = np.asarray(data_set.labels)
 print("finished reading data.")
-images, labels = data_set.next_batch(batch_size)
+# images, labels = data_set.next_batch(batch_size)
 img_test, label_test = data_set.next_batch(batch_size)
 # img_val,label_val = data_set.next_batch(batch_size)
 images = np.asarray(images, dtype=np.float32)
 labels = np.asarray(labels, dtype=np.int32)
+labels = reshape(labels)
 img_test = np.asarray(img_test, dtype=np.float32)
 label_test = np.asarray(label_test, dtype=np.int32)
+label_test = reshape(label_test)
 # img_val = np.asarray(img_val,dtype=np.float32)
 # label_val = np.asarray(label_val,dtype=np.int32)
 print("images shape:" + str(images.shape), images.dtype)
@@ -39,39 +39,41 @@ session_conf = tf.ConfigProto(
     #    log_device_placement=True
 )
 # session_conf.gpu_options.allow_growth = True
-with tf.device("/CPU:0"):
+with tf.device("/GPU:1"):
     with tf.Session(config=session_conf) as sess:
         sess.as_default()
         shape = images.shape
         x = tf.placeholder(tf.float32, [None, shape[1], shape[2], shape[3], 1], name='x')
-        valid_seg = tf.placeholder(tf.int32, [None, shape[1], shape[2], shape[3]], name="valid_seg")
+        valid_seg = tf.placeholder(tf.int32, [None, shape[1], shape[2], shape[3], 3], name="valid_seg")
         logits = vox_res_net(x, is_train=True, n_out=3)
         # net = vox_res_net(x, is_train=True, n_out=3)
         outputs = [x.outputs for x in logits]
         net = logits[-1]
         out_seg = net.outputs
-        print(out_seg, valid_seg.shape)
+        print("outseg shape:  "+str(out_seg.shape))
+        print("validseg shape:  "+str(valid_seg.shape))
 
         # 定义评估函数 监控量
-        correct_prediction = tf.equal(tf.cast(tf.argmax(out_seg, 4), tf.int32), valid_seg)
+        correct_prediction = tf.equal(tf.cast(tf.argmax(out_seg, 4), tf.int32), tf.cast(tf.argmax(valid_seg, 4), tf.int32))
         acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-        loss = tl.cost.cross_entropy(out_seg, valid_seg, "cost")
+        loss = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=out_seg, labels=valid_seg))
         print(loss)
         train_params = net.all_params
         for t in logits[:-1]:
-            w = tf.Variable(1.0, name="classifier_w")
+            w = tf.Variable(1.0 - 0.999 * tf.cast(global_step, tf.float32) / (n_epoch * 60), name="classifier_w")
             train_params.append(w)
-            loss += w * tl.cost.cross_entropy(t.outputs, valid_seg, "cost")
+            loss += w * tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=t.outputs, labels=valid_seg))
         print("output shape:  "+str(t.outputs.shape))
-        cost = tf.contrib.layers.l2_regularizer(1e-4)(net.all_params[-1])
+        cost = tf.contrib.layers.l2_regularizer(1e-4)(net.all_params[-4])
         # cost -= tl.cost.cross_entropy(out_seg, valid_seg, "cost")
         # for output in outputs[:-1]:
         #     cost -= tl.cost.cross_entropy(output,valid_seg,"cost")
         cost += loss
         print(cost)
         train_op = tf.train.AdamOptimizer(learning_rate=learning_rate, beta1=0.9, beta2=0.999,
-                                          epsilon=1e-08, use_locking=False).minimize(cost, var_list=train_params)
+                                          epsilon=1e-08, use_locking=False).minimize(cost, global_step=global_step,
+                                                                                     var_list=train_params)
         tl.layers.initialize_global_variables(sess)
         net.print_params()
         net.print_layers()
@@ -124,5 +126,6 @@ with tf.device("/CPU:0"):
         tl.utils.test(sess, net, acc, img_test, label_test, x, valid_seg, batch_size=batch_size, cost=cost)
 
         # 模型保存
-        tl.files.save_npz(net.all_params, name='model.npz')
+        tl.files.save_npz(net.all_params[:-4], name='model.npz')
         sess.close()
+
