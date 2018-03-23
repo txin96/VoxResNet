@@ -4,13 +4,13 @@ import numpy
 
 
 class DataSet:
-    
+
     def __init__(self, image_dir, label_dir):
         self._images, self._labels = self._read_dir(image_dir, label_dir)
         self._index_in_epoch = 0
         self._epochs_completed = 0
         self._num_examples = len(self._images)
-    
+
     def _read_dir(self, datadir, labeldir):
         data = []
         label = []
@@ -20,7 +20,7 @@ class DataSet:
                 data.append(nibabel.nifti1.load(datadir + '/' + file).get_data())
                 label.append(nibabel.nifti1.load(labeldir + '/' + file).get_data())
         return data, label
-    
+
     def next_batch(self, batch_size):
         if batch_size > self._num_examples:
             print("request batch size exceeds current size, automatically adapt to current size.")
@@ -38,7 +38,7 @@ class DataSet:
             assert batch_size <= self._num_examples
         end = self._index_in_epoch
         return self._images[start:end], self._labels[start:end]
-    
+
     def _shuffle_data(self):
         # Shuffle the data
         perm = numpy.arange(self._num_examples)
@@ -51,4 +51,3 @@ class DataSet:
     @property
     def labels(self):
         return self._labels
-

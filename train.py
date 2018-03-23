@@ -1,45 +1,32 @@
 from model import *
 from input_data import *
 import tensorflow as tf
-import nibabel as nib
-import numpy as np
-import os
 from utils import *
 
 
-# img = nib.load('pack/preprocess/image/ADNI_002_S_1018_MR_MPR__GradWarp__B1_Correction__N3__Scaled_Br_20070217030439623_S23128_I40817.nii.gz')
-# data = img.get_data()
-# print(data.shape)
-
 # basic param
-n_image = 132
-n_epoch = 180
+n_image = 107
+n_epoch = 200
 n_class = 3
 batch_size = 2
 total_step = n_epoch * n_image / batch_size
 global_step = tf.Variable(0, name='global_step')
-# learning_rate = 0.001
 learning_rate = tf.train.exponential_decay(0.001, global_step, 100, 0.96, staircase=True)
 print_freq = 1
 
 print("reading data...")
-data_set = DataSet("normalize/image", "normalize/label")
+data_set = DataSet("processedpic/image", "processedpic/label")
 images = np.asarray(data_set.images)
 labels = np.asarray(data_set.labels)
-print("finished reading data.")
-# images, labels = data_set.next_batch(batch_size)
-img_test, label_test = data_set.next_batch(batch_size)
-# img_val,label_val = data_set.next_batch(batch_size)
 images = np.asarray(images, dtype=np.float32)
 labels = np.asarray(labels, dtype=np.int32)
 labels = one_hot(labels, n_class)
+print("finished reading data.")
+
+img_test, label_test = data_set.next_batch(batch_size)
 img_test = np.asarray(img_test, dtype=np.float32)
 label_test = np.asarray(label_test, dtype=np.int32)
 label_test = one_hot(label_test, n_class)
-# img_val = np.asarray(img_val,dtype=np.float32)
-# label_val = np.asarray(label_val,dtype=np.int32)
-print("images shape:" + str(images.shape), images.dtype)
-print("labels shape:" + str(labels.shape), labels.dtype)
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 session_conf = tf.ConfigProto(
@@ -79,10 +66,10 @@ with tf.device("/GPU:0"):
             l2 += tf.contrib.layers.l2_regularizer(1e-4)(w)
         cost = l2 + loss
         print(cost)
-
         train_op = tf.train.AdamOptimizer(learning_rate=learning_rate, beta1=0.9, beta2=0.999,
                                           epsilon=1e-08, use_locking=False).minimize(cost, global_step=global_step,
                                                                                      var_list=train_params[:-4])
+
         tl.layers.initialize_global_variables(sess)
         net.print_params()
         net.print_layers()
