@@ -1,6 +1,4 @@
 import numpy as np
-import nibabel as nib
-import os
 
 #两个参数要规格一致
 def dice_metric(sample_seg,real_seg):
