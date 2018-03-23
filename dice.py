@@ -14,7 +14,7 @@ def dice_metric(sample_seg,real_seg):
     for i in range(0,x):
         for j in range(0,y):
             for k in range(0,z):
-                if sample_seg[i][j][k]>0 and real_seg[i][j][k]>0:
+                if sample_seg[i][j][k]==real_seg[i][j][k]:
                     intersect+=1
 
     return 2*intersect/float(sample_sum+real_sum)
