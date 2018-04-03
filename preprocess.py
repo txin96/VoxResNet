@@ -60,7 +60,7 @@ def crop_image(input, output, median_radius=4, numpass=4, mask_path=None):
     print(mask_crop.shape, mask_crop.dtype, b0_mask_crop.shape, b0_mask_crop.dtype)
     b0_img_crop = nib.Nifti1Image(
         b0_mask_crop.astype(np.float32), affine)
-    nib.save(b0_img_crop, output + '_mask_crop.nii.gz')
+    nib.save(b0_img_crop, output + '.nii.gz')
 
 
 def crop_image_dir(input_dir, output_dir, median_radius=4, numpass=4, mask_dir=None):
@@ -70,6 +70,8 @@ def crop_image_dir(input_dir, output_dir, median_radius=4, numpass=4, mask_dir=N
     for file in files:
         file_name_without_ext = os.path.splitext(os.path.splitext(file)[0])[0]
         if mask_dir is not None:
+            if not os.path.exists(mask_dir):
+                os.makedirs(mask_dir)
             crop_image(input_dir + "/" + file, output_dir + "/" + file_name_without_ext, median_radius, numpass,
                        mask_dir + "/" + file_name_without_ext)
         else:
@@ -133,5 +135,9 @@ def normalize(input_dir, output_dir, is_label):
         new_img = nib.Nifti1Image(arr, data.affine)
         nib.save(new_img, output_dir + "/" + files[i])
 
-normalize("pack/crop/image","pack/normalize/image",False)
-normalize("pack/crop/label","pack/normalize/label",True)
+
+if __name__ == '__main__':
+    crop_image_dir('data/image', 'crop/image', mask_dir='crop/mask')
+    crop_label_dir('data/label', 'crop/mask', 'crop/label')
+    normalize("crop/image", "normalize/image", False)
+    normalize("crop/label", "normalize/label", True)
