@@ -4,7 +4,6 @@ import scipy.ndimage.filters as filter
 import numpy as np
 import cv2
 
-
 def pic_process(source_path, result_path):
     img_path = source_path
     imgs = []
@@ -25,7 +24,7 @@ def pic_process(source_path, result_path):
         z = img3d.shape[2]
 
         # 高斯平滑
-        smoothed3d = filter.gaussian_filter(img3d, 0.7)
+        smoothed3d = filter.gaussian_filter(img3d, 0.85)
 
         # 计算最大最小值
         max = np.amax(smoothed3d)
@@ -36,7 +35,7 @@ def pic_process(source_path, result_path):
         smoothed3d = np.uint8(smoothed3d)
 
         # CLAHE增强
-        clahe = cv2.createCLAHE(clipLimit=4.5)
+        clahe = cv2.createCLAHE(clipLimit=4.86)
         for i in range(0, z):
             smoothed3d[:, :, i] = clahe.apply(smoothed3d[:, :, i])
 
