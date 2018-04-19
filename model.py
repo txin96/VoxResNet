@@ -1,7 +1,5 @@
-import tensorflow as tf
 import tensorlayer as tl
 from tensorlayer.layers import *
-import nibabel as nib
 
 
 def vox_res_module(x, prefix, is_train=True, reuse=False):
@@ -10,7 +8,7 @@ def vox_res_module(x, prefix, is_train=True, reuse=False):
     conv1 = Conv3dLayer(bn1, shape=[1, 3, 3, 64, 64], strides=[1, 1, 1, 1, 1], W_init=w_init, name=prefix + "conv1")
     bn2 = BatchNormLayer(conv1, act=tf.nn.relu, is_train=is_train, name=prefix + "bn2")
     conv2 = Conv3dLayer(bn2, shape=[3, 3, 3, 64, 64], strides=[1, 1, 1, 1, 1], W_init=w_init, name=prefix + "conv2")
-    out = ElementwiseLayer(layers=[x, conv2], combine_fn=tf.add, name=prefix + "out")
+    out = ElementwiseLayer([x, conv2], combine_fn=tf.add, name=prefix + "out")
     return out
 
 
@@ -52,11 +50,10 @@ def vox_res_net(x, is_train=True, reuse=False, n_out=3):
                                    name="classifier2a")
         classifier3a = Conv3dLayer(decon3a, shape=[1, 1, 1, 4, n_out], strides=[1, 1, 1, 1, 1], W_init=w_init,
                                    name="classifier3a")
-        out = ElementwiseLayer(layers=[classifier0a, classifier1a, classifier2a, classifier3a], combine_fn=tf.add,
+        out = ElementwiseLayer([classifier0a, classifier1a, classifier2a, classifier3a], combine_fn=tf.add,
                                name="out")
     if is_train:
         return [classifier0a, classifier1a, classifier2a, classifier3a, out]
     else:
         return out
-    #     out = Conv3dLayer(inputs, shape=[3, 3, 3, 1, 3], strides=[1, 1, 1, 1, 1], W_init=w_init, name="test")
-    #     return out
+

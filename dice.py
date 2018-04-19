@@ -1,5 +1,4 @@
 import numpy as np
-import nibabel as nb
 from input_data import *
 
 
@@ -24,7 +23,7 @@ def dice_metric(predict_seg, ground_truth):
 
 
 if __name__ == '__main__':
-    data_set = DataSet("test/image", "test/label")
+    data_set = DataSet("segment/", "test/label")
     result = np.asarray(data_set.images)
     truth = np.asarray(data_set.labels)
     acc = 0.0
