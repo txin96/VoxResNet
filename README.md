@@ -20,6 +20,5 @@ This is an unofficial implementation of [VoxResNet: Deep Voxelwise Residual Netw
 # Testing
 1. Follow steps in the Data Setup
 2. Run segment.py, and the outputs are saved to save_path
-3. Run dice.py, dice is defined as: <a href="https://www.codecogs.com/eqnedit.php?latex=Dice(A,&space;B)&space;=&space;\frac{2|A&space;\cap&space;B|}{|A|&plus;|B|}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Dice(A,&space;B)&space;=&space;\frac{2|A&space;\cap&space;B|}{|A|&plus;|B|}" title="Dice(A, B) = \frac{2|A \cap B|}{|A|+|B|}" /></a>
-
-
+3. Run dice.py, dice is defined as:
+<a href="https://www.codecogs.com/eqnedit.php?latex=Dice(A,&space;B)&space;=&space;\frac{2|A&space;\cap&space;B|}{|A|&plus;|B|}" align = center target="_blank"><div align=center><img src="https://latex.codecogs.com/gif.latex?Dice(A,&space;B)&space;=&space;\frac{2|A&space;\cap&space;B|}{|A|&plus;|B|}" title="Dice(A, B) = \frac{2|A \cap B|}{|A|+|B|}" /></div></a>
