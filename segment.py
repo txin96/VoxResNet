@@ -3,13 +3,13 @@ import tensorflow as tf
 import tensorlayer as tl
 from utils import *
 
-# basic param
+# Basic param
 batch_size = 1
 n_class = 3
 
-# file path
+# File path
 test_image_path = "test/image"
-model_path = "model/160x188x128/model.npz"
+model_path = "model/model.npz"
 save_path = "segment/"
 
 

@@ -9,7 +9,7 @@ def new_normalize(input_file, output_file, shape, is_label):
     data = img.get_data()
     data = np.squeeze(data)
     shape = list(shape)
-    if (len(shape) > 3):
+    if len(shape) > 3:
         shape = shape[:3]
     print(data.shape, shape)
     slice_in = [
@@ -37,9 +37,10 @@ def process(input_dir, output_dir, shape, is_label):
 
 if __name__ == '__main__':
     print("Begin preprocessing.")
-    # 在此处修改文件路径，process的第二个参数是中间文件，最终文件在pic_process的第二个参数路径下
-    process('2018fwwb/image', 'pack/test/image', (160, 188, 128), False)
-    process('2018fwwb/label', 'pack/test/label', (160, 188, 128), True)
-    pic_process('pack/test/image', 'test/image')
+    # Modify the save path here, second parameter is temporary file path
+    process('origin/image', 'pack/image', (160, 188, 128), False)
+    process('origin/label', 'pack/label', (160, 188, 128), True)
+    # The second parameter here is where preprocessed file are saved
+    pic_process('pack/image', 'train/image')
     print("Finish preprocessing.")
 

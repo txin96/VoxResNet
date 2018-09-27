@@ -1,12 +1,9 @@
 from model import *
 from input_data import *
 import tensorflow as tf
-import nibabel as nib
-import numpy as np
-import os
 from utils import *
 
-# basic param
+# Basic param
 n_image = 100
 n_epoch = 200
 n_class = 3
@@ -16,7 +13,7 @@ global_step = tf.Variable(0, name='global_step')
 learning_rate = tf.train.exponential_decay(0.001, global_step, 150, 0.99, staircase=True)
 print_freq = 1
 
-# reading data
+# Reading data
 print("reading data...")
 data_set = DataSet("train/image", "train/label")
 images = np.asarray(data_set.images)
@@ -26,7 +23,7 @@ image_test = np.asarray(test_set.images)
 label_test = np.asarray(test_set.labels)
 print("finished reading data.")
 
-# convert data to array
+# Convert data to array
 images = np.asarray(images, dtype=np.float32)
 labels = np.asarray(labels, dtype=np.int32)
 labels = one_hot(labels, n_class)
@@ -54,7 +51,6 @@ with tf.device("/GPU:0"):
         print("out_seg shape:  " + str(out_seg.shape))
         print("valid_seg shape:  " + str(valid_seg.shape))
 
-        # 定义评估函数 监控量
         correct_prediction = tf.equal(tf.cast(tf.argmax(out_seg, 4), tf.int32),
                                       tf.cast(tf.argmax(valid_seg, 4), tf.int32))
         acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -80,16 +76,16 @@ with tf.device("/GPU:0"):
         net.print_params()
         net.print_layers()
 
-        # 训练网络
+        # train
         tl.utils.fit(sess, net, train_op, cost, images, labels, x, valid_seg,
                      acc=acc, batch_size=batch_size, n_epoch=n_epoch, print_freq=print_freq,
                      eval_train=False, tensorboard=True, tensorboard_epoch_freq=1, tensorboard_graph_vis=True,
                      tensorboard_weight_histograms=True)
 
-        # 评估模型
+        # evaluate
         tl.utils.test(sess, net, acc, image_test, label_test, x, valid_seg, batch_size=batch_size, cost=cost)
 
-        # 模型保存
+        # Save model
         tl.files.save_npz(net.all_params[:-4], name='model.npz')
 
         sess.close()

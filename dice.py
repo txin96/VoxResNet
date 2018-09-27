@@ -2,7 +2,7 @@ import numpy as np
 from input_data import *
 
 
-# 两个参数要规格一致
+# two images must have same shape
 def dice_metric(predict_seg, ground_truth):
     shape = predict_seg.shape
     x = shape[0]
