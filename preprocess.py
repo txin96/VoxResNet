@@ -38,9 +38,9 @@ def process(input_dir, output_dir, shape, is_label):
 if __name__ == '__main__':
     print("Begin preprocessing.")
     # Modify the save path here, second parameter is temporary file path
-    process('origin/image', 'pack/image', (160, 188, 128), False)
-    process('origin/label', 'pack/label', (160, 188, 128), True)
+    process('sample/image', 'temp/image', (192, 192, 160), False)
+    process('sample/label', 'temp/label', (192, 192, 160), True)
     # The second parameter here is where preprocessed file are saved
-    pic_process('pack/image', 'train/image')
+    pic_process('temp/image', 'train/image')
     print("Finish preprocessing.")
 

@@ -15,10 +15,12 @@ print_freq = 1
 
 # Reading data
 print("reading data...")
-data_set = DataSet("train/image", "train/label")
+data_set = DataSet("sample/image", "sample/label")
+# data_set = DataSet("train/image", "sample/label")
 images = np.asarray(data_set.images)
 labels = np.asarray(data_set.labels)
-test_set = DataSet("test/image", "test/label")
+
+test_set = DataSet("sample/image", "sample/label")
 image_test = np.asarray(test_set.images)
 label_test = np.asarray(test_set.labels)
 print("finished reading data.")
@@ -26,10 +28,10 @@ print("finished reading data.")
 # Convert data to array
 images = np.asarray(images, dtype=np.float32)
 labels = np.asarray(labels, dtype=np.int32)
-labels = one_hot(labels, n_class)
+labels = np.squeeze(one_hot(labels, n_class))
 image_test = np.asarray(image_test, dtype=np.float32)
 label_test = np.asarray(label_test, dtype=np.int32)
-label_test = one_hot(label_test, n_class)
+label_test = np.squeeze(one_hot(label_test, n_class))
 print("images shape:" + str(images.shape), images.dtype)
 print("labels shape:" + str(labels.shape), labels.dtype)
 
