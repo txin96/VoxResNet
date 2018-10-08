@@ -12,6 +12,8 @@ This is an unofficial implementation of [VoxResNet: Deep Voxelwise Residual Netw
 # Data Setup
 1. Download ADNI dataset from http://adni.loni.usc.edu. (or other dataset you want)
 2. Modify file path and run preprocess.py.
+    - You can skip this step if data augmentation is not required.
+    - And make sure all of your images have the same size.
 
 # Training
 1. Follow steps in the Data Setup
